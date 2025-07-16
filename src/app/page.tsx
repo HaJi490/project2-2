@@ -1,103 +1,180 @@
+'use client'
+
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import axios from "axios";
+
+import ChargingMap from "@/components/ChargingMap/ChargingMap";
+import {ChargingStationResponseDto, ChargingStationRequestDto} from '../types/dto'
+import nmToid from '../db/busi_id.json'
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+interface Filters {
+  lat: number;
+  lon: number;
+  radius: number;
+  canUse: boolean;
+  parkingFree: boolean;
+  limitYn: boolean;
+  chargerTypes: string[];
+  chargerComps: string[];
+  outputMin: number;
+  outputMax: number;
+  keyWord?: string;
+}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+export default function Home() {
+  const ongoing = useRef<AbortController | null>(null); // 1) AbortController 로 이전 요청 취소
+  const[chgerData, setChgerData] = useState<ChargingStationResponseDto[]>([]);  // resp
+  const [currentFilter, setCurrentFilter] = useState<Filters>({                 // req에 담을 정보
+      lat: 0,
+      lon: 0,
+      radius: 2000,
+      canUse: false,
+      parkingFree: false,
+      limitYn: false,
+      chargerTypes: [],
+      chargerComps: [],
+      outputMin: 0,
+      outputMax: 300, 
+      keyWord: '',
+  });
+  const [myPos, setMyPos] = useState<[number, number] | null >(null);           // 맵에 쓰일 현재위치 _ 반경표시
+  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);    // 맵의 중심  // 초기값설정해두면 fetch가 두번 반복되기 때문에 맵에 그려질 수도 있고 아닐 때도 있는거
+
+  // 1. 충전소 정보 가져오기
+    const fetchStations = useCallback(async (filtersToApply: Filters) => {
+      ongoing.current?.abort();                   // 직전 요청 취소
+      const controller = new AbortController();   // 새 컨트롤러
+      ongoing.current = controller;
+
+    function CompNmToIds(selectedNm: string[]):string[]{
+      return nmToid.filter(company => selectedNm.includes(company.busi_nm))
+                  .map(company => company.busi_id);
+    }
+    // API 요청 DTO에 맞게 필터 객체 구성
+    const requestBody: ChargingStationRequestDto = {
+      "coorDinatesDto" : {
+        lat: filtersToApply.lat,
+        lon: filtersToApply.lon,
+        radius: filtersToApply.radius,
+      },
+      "mapQueryDto":{
+        useMap: true,
+        canUse: filtersToApply.canUse,
+        parkingFree: filtersToApply.parkingFree,
+        limitYn: filtersToApply.limitYn,
+        chgerType: filtersToApply.chargerTypes.length > 0 ? filtersToApply.chargerTypes : [], // 빈 배열일 때 undefined로 보내는 등 백엔드에 맞게 조정
+        busiId: filtersToApply.chargerComps.length > 0 ? CompNmToIds(filtersToApply.chargerComps) : [],
+        outputMin: filtersToApply.outputMin,
+        outputMax: filtersToApply.outputMax,
+        keyWord: filtersToApply.keyWord
+      }
+    };
+
+    console.log("API 요청 보낼 필터:", requestBody);
+
+    try {
+      const res = await axios.post<ChargingStationResponseDto[]>(
+        `http://${process.env.NEXT_PUBLIC_BACKIP}:8080/map/post/stations`,
+        requestBody,
+        { signal: controller.signal } 
+      );
+      const data = res.data;
+
+      setChgerData(Array.isArray(data) ? data : []);
+      console.log("충전소 정보:: ", data);
+    } catch (err) {
+      if (axios.isCancel(err)) return;            // “정상 취소”는 무시
+      console.error("fetchStations error: ", err);
+      setChgerData([]);
+    }
+  }, []); 
+
+  // 받은 chgerData markers에 넣기
+  const markers = useMemo(() => {
+    console.log('Memo: marker 재생성')  
+    return chgerData.map((item) => ({ // 🍕 respDummies 로 변경
+                id: item.statId,
+                name: item.statNm,
+                lat: item.lat,
+                lng: item.lng,
+                availableCnt: item.chargeNum,
+      }));
+    }, [chgerData]);
+
+  // 2. 현재위치 가져오기
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      setMapCenter([lat, lng]);
+      setMyPos([lat, lng]);
+    },
+    (error) => {
+      console.error('위치정보를 가져오지 못했습니다.', error);
+      // 위치 못가져오면 부산대역- 디폴트값
+      const defaultPos: [number, number] = [35.1795, 129.0756]
+      setMapCenter(defaultPos);
+      setMyPos(defaultPos);
+    }
+  )
+  }, [])
+
+  // 3. 카카오지도 api 로드확인 및 콜백 등록
+  // useEffect(()=>{
+  //   //window객체 존재 확인
+  //   if(window.kakao && window.kakao.maps){
+  //     window.kakao.maps.load(() => {
+  //       if(window.kakao.maps.services){
+  //         console.log('KakaoMap API 로드 성공');
+  //         setKakaoMapLoaded(true);
+  //       } else {
+  //         console.error('KakaoMap API services 로드 실패')
+  //       }
+  //     });
+  //   } else {
+  //     console.warn('KakaoMap API 아직 로드안됨')
+  //     // 일정시간 후 다시 시도하거나 사용자에게 알림 ---------------------  FIXME
+  //     // layout.tsx에 strategy옵션 확인 //gemini '오류는...'
+  //   }
+  // },[])
+
+  // 4. currentFilter 변경 시 충전소 정보 다시 불러오기
+  useEffect(()=>{
+    if (myPos ) { 
+        const filtersToRequest = {
+            ...currentFilter,
+            lat: myPos[0], // 위치 정보는 항상 myPos에서 가져옵니다 (Single Source of Truth)
+            lon: myPos[1],
+        };
+        // setCurrentFilter(filtersToRequest);
+        fetchStations(filtersToRequest);
+    }
+  },[myPos, currentFilter, fetchStations])
+
+  // 9. 지도 현위치에서 검색
+  const handleSearchHere = useCallback((center: {lat: number, lng: number}) =>{
+    const lat = center.lat;
+    const lng = center.lng;
+    console.log('지도중심 좌표: ', lat, lng);
+    setMyPos([lat, lng]);
+    setMapCenter([lat, lng]);
+    
+    // setCurrentFilter(prev => ({
+    //   ...prev,
+    //   lat: lat,
+    //   lon: lng,
+    // }));
+  },[]) //재생성될 필요가 없으므로
+
+  return (
+    <div className="w-full h-screen flex flex-col">
+      <p className="p-4 font-bold">지도</p>
+      <div className="flex-grow w-full h-full">
+        {myPos && mapCenter &&
+          <ChargingMap myPos={myPos} radius={currentFilter.radius} mapCenter={mapCenter} markers={markers} posHere={handleSearchHere}/>
+        }
+      </div>
     </div>
   );
 }

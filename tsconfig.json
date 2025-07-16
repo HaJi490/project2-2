@@ -13,6 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "types": ["kakao.maps.d.ts"], // 카카오맵 추가
     "plugins": [
       {
         "name": "next"
