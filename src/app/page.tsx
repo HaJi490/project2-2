@@ -40,9 +40,11 @@ export default function Home() {
   });
   const [myPos, setMyPos] = useState<[number, number] | null >(null);           // 맵에 쓰일 현재위치 _ 반경표시
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);    // 맵의 중심  // 초기값설정해두면 fetch가 두번 반복되기 때문에 맵에 그려질 수도 있고 아닐 때도 있는거
+  const [selectedStation, setSelectedStation] = useState<ChargingStationResponseDto | null >(null);     // 선택된 충전소
 
   // 1. 충전소 정보 가져오기
     const fetchStations = useCallback(async (filtersToApply: Filters) => {
+      console.log('[Home] 1. 충전소 정보요청')
       ongoing.current?.abort();                   // 직전 요청 취소
       const controller = new AbortController();   // 새 컨트롤러
       ongoing.current = controller;
@@ -92,7 +94,7 @@ export default function Home() {
 
   // 받은 chgerData markers에 넣기
   const markers = useMemo(() => {
-    console.log('Memo: marker 재생성')  
+    console.log('[Home] -  Memo: marker 재생성')  
     return chgerData.map((item) => ({ // 🍕 respDummies 로 변경
                 id: item.statId,
                 name: item.statNm,
@@ -104,6 +106,7 @@ export default function Home() {
 
   // 2. 현재위치 가져오기
   useEffect(() => {
+    console.log('[Home] 2. 현재위치 가져오기')
     navigator.geolocation.getCurrentPosition((position) => {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
@@ -141,7 +144,8 @@ export default function Home() {
 
   // 4. currentFilter 변경 시 충전소 정보 다시 불러오기
   useEffect(()=>{
-    if (myPos ) { 
+    console.log('[Home] 4. filter, myPos 변경시 충전소정보 재요청')
+    if (myPos) { 
         const filtersToRequest = {
             ...currentFilter,
             lat: myPos[0], // 위치 정보는 항상 myPos에서 가져옵니다 (Single Source of Truth)
@@ -154,9 +158,10 @@ export default function Home() {
 
   // 9. 지도 현위치에서 검색
   const handleSearchHere = useCallback((center: {lat: number, lng: number}) =>{
+    console.log('[Home] 9. 현지도에서 검색 실행시')
     const lat = center.lat;
     const lng = center.lng;
-    console.log('지도중심 좌표: ', lat, lng);
+    console.log('[Home]지도중심 좌표: 9-', lat, lng);
     setMyPos([lat, lng]);
     setMapCenter([lat, lng]);
     
@@ -171,7 +176,7 @@ export default function Home() {
     <div className="w-full h-screen flex flex-col">
       <p className="p-4 font-bold">지도</p>
       <div className="flex-grow w-full h-full">
-        {myPos && mapCenter &&
+        {myPos && mapCenter && markers.length > 0 &&
           <ChargingMap myPos={myPos} radius={currentFilter.radius} mapCenter={mapCenter} markers={markers} posHere={handleSearchHere}/>
         }
       </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import { Map, MapMarker, useKakaoLoader, CustomOverlayMap, Circle, MarkerClusterer } from 'react-kakao-maps-sdk'
 
 interface ChargingMapProps {
@@ -32,11 +32,16 @@ type InfoWindowState = {
 
 
 export default function ChargingMap({ myPos, radius, mapCenter, markers, selectedStationId, posHere }: ChargingMapProps) {
-    const [map, setMap] = useState<kakao.maps.Map>(); // 지도인스턴스 저장
+    const [map, setMap] = useState<kakao.maps.Map>(null); // 지도인스턴스 저장
     // const [infoWindow, setInfoWindow] = useState<InfoWindowState>(null);
     const [currentZoom, setCurrentZoom] = useState(5);
 
     const MIN_CLUSTER_LEVEL = 6; // 클러스터링 최소레벨
+
+    // 0. 
+    useEffect(()=>{
+
+    },[])
 
     // 1. Hook을 이용하여 Kakao맵 불러오기
     const [loading, error] = useKakaoLoader({
@@ -46,6 +51,7 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
 
     // 2. 선택된 충전소 변경시 지도중심 이동 및 확대- mapCenter
     useEffect(() => {
+        console.log('[ChargingMap] 2.선택된 충전소 변경시')
         if (!map || !selectedStationId) return;
 
         const selectedMarker = markers.find(marker => marker.id === selectedStationId);
@@ -55,14 +61,13 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
             map.setLevel(3, { anchor: position }); // 레벨 3으로 확대
             map.panTo(position); // 부드럽게 이동
         }
-
-
-    }, [selectedStationId, map, markers]);
+    }, [selectedStationId, map]);
 
     // 3. mapCenter prop변경시 지도 중심 이동
     useEffect(() => {
+        console.log('[ChargingMap] 3.mapCenter 변경시')
         if (map && mapCenter) {
-            console.log('[mapCenter]', mapCenter);
+            console.log('[ChargingMap] 3-', mapCenter);
             // 새로운 좌표객체
             const moveLatLon = new kakao.maps.LatLng(mapCenter[0], mapCenter[1]);
 
@@ -73,9 +78,10 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
 
     // 4. '현지도에서 검색' 핸들러
     const handleSearchHere = () => {
+        console.log('[ChargingMap] 4.현지도에서 검색 클릭시')
         if (map) {
             const center = map.getCenter();
-            posHere({ lat: center.getLat(), lng: center.getLng() }); // 부모로 전달 // ❗ 전달방식 바뀜(center->lat, lng)
+            posHere({ lat: center.getLat(), lng: center.getLng() }); // 부모로 전달 
         }
     }
 
@@ -103,7 +109,7 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                 onCreate={setMap}   // map인스턴스를 저장
                 onIdle={(map) => setCurrentZoom(map.getLevel())} // 줌 레벨 변경 시 state 업데이트
             >
-                {/* 내 위치기분 반경 - 🙆‍♀️ */}
+                {/* 내 위치기반 반경 */}
                 {myPos && (
                     <Circle center={{ lat: myPos[0], lng: myPos[1] }}
                         radius={radius}
@@ -116,10 +122,12 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                 )}
 
                 {/* 2. 맵객체 확실히 생긴후 클러스터, 마커 생성 */}
-                {map &&
+                {map && 
                     <>
                         {/* 마커 클러스터러 */}
-                        <MarkerClusterer averageCenter={true}   // 클러스터 마커를 평균 위치로 설정
+                        <MarkerClusterer 
+                            key={markers.length > 0 ? `${markers.length}-${mapCenter}` : mapCenter?.join('-')}    // 마커가 바뀔때마다 바뀌는값으로 key값을 주기❗
+                            averageCenter={true}   // 클러스터 마커를 평균 위치로 설정
                             minLevel={MIN_CLUSTER_LEVEL}    // 클러스터링 최소 레벨
                             // disableDefaultClick={true}
                             styles={[
@@ -144,14 +152,11 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                                     imgSrc = '/available.png';
                                     imgSize = { width: 32, height: 32 };
                                 }
-
-                                // 디버깅코드
-                                // console.log(`Marker ID: ${marker.id}, currentZoom: ${currentZoom}, isAvailable: ${isAvailable}, isSelected: ${isSelected}, Condition: ${isAvailable && !isSelected && currentZoom < MIN_CLUSTER_LEVEL}`);
-
-
                                 return (
-                                    <React.Fragment key={marker.id}>
-                                        <MapMarker position={{ lat: marker.lat, lng: marker.lng }}
+                                    // <React.Fragment key={marker.id}>
+                                        <MapMarker 
+                                            key={marker.id}
+                                            position={{ lat: marker.lat, lng: marker.lng }}
                                             image={{
                                                 src: imgSrc,
                                                 size: imgSize,
@@ -172,32 +177,24 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                                             {/* <div>{pos.availableCnt}</div> */}
                                         </MapMarker>
                                         
-                                        {/* )} */}
-                                    </React.Fragment>
                                 )
                             })}
                         </MarkerClusterer>
                         {/* 기본 오버레이 */}
                         {markers.map((marker:MarkerType) => {
-                            const show = marker.availableCnt > 0 && marker.id === selectedStationId && currentZoom < MIN_CLUSTER_LEVEL;
+                            const show = marker.availableCnt > 0 && marker.id !== selectedStationId && currentZoom < MIN_CLUSTER_LEVEL;
                             if(show){
                                 return (
                                     <CustomOverlayMap
+                                        key={marker.id}
                                         position={{ lat: marker.lat, lng: marker.lng }}
-                                        yAnchor={1.2}
+                                        yAnchor={1.35}
+                                        zIndex={10}
                                     >
                                         <div className="customoverlay">
-                                            {/* ++클릭했을때 해당페이지로 이동가능 */}
-                                            {/* <a
-                                            href="https://map.kakao.com/link/map/11394059"
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            > */}
-
-                                            <div className="text-red" style={{ zIndex: 10 }}>
+                                            <div style={{color: 'white', fontSize: '12px'}} >
                                                 {marker.availableCnt}
                                             </div>
-                                            {/* </a> */}
                                         </div>
                                     </CustomOverlayMap>
                                 )
