@@ -10,7 +10,7 @@ import { jwtDecode } from "jwt-decode";
 import Toast from "@/components/Toast/Toast";
 import { IoMdHome } from "react-icons/io";
 import Link from "next/link";
-import { accessTokenAtom, tokenExpireAtAtom } from "@/store/auth";
+import { accessTokenAtom, tokenExpireAtAtom, roleAtom } from "@/store/auth";
 
 // 토큰 페이로드의 타입 정의
 interface TokenPayload {
@@ -22,6 +22,7 @@ interface TokenPayload {
 export default function page() {
   const [, setToken] = useAtom(accessTokenAtom);
   const [, setTokenExpireAt] = useAtom(tokenExpireAtAtom);
+  const [, setRoleAtom] = useAtom(roleAtom);
   const [toastMsg, setToastMsg] = useState<string>('');
 
   const [id, setId] = useState('');
@@ -54,7 +55,8 @@ export default function page() {
       const expireAt = decode.exp * 1000; // jwt는 초단위이므로, ms단위로 변환 
       // const expireAt = Date.now() + 1000 * 60 * 60 * 2; // 2시간 후 만료
 
-      console.log(userRole);
+      setRoleAtom(userRole[0] as 'ROLE_MANAGER' | 'ROLE_MEMBER' | 'ROLE_GUEST');
+      console.log(roleAtom);
       setToken(token);
       setTokenExpireAt(expireAt);
       

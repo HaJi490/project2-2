@@ -5,6 +5,8 @@ import { atomWithStorage } from 'jotai/utils';
 export const accessTokenAtom = atomWithStorage<string | null > ('accessToken', null);
 // 2. 자동 로그아웃
 export const tokenExpireAtAtom = atomWithStorage<number | null >('tokenExpireAt', null); // 타임스탬프(ms)
+// 3. 롤저장
+export const roleAtom = atomWithStorage<'ROLE_GUEST' | 'ROLE_MEMBER'| 'ROLE_MANAGER' >('role', 'ROLE_GUEST');   //SSR 환경에서는 localStorage 접근이 서버에서는 안 되므로, useEffect 내부에서 읽는 게 안전
 
 /* 3. 파생 아톰 – 토큰 존재 여부만 true/false로 */
 // export const isLoggedInAtom = atom((get)=>!!get(accessTokenAtom));

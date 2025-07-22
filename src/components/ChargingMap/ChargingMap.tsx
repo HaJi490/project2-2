@@ -152,6 +152,9 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                                     imgSrc = '/available.png';
                                     imgSize = { width: 32, height: 32 };
                                 }
+
+                                const showOverlay = isAvailable && !isSelected;
+
                                 return (
                                     // <React.Fragment key={marker.id}>
                                         <MapMarker 
@@ -174,7 +177,20 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                                             // }}
                                             zIndex={isSelected ? 999 : 1}
                                         >
-                                            {/* <div>{pos.availableCnt}</div> */}
+                                        {/* {showOverlay &&(
+                                            <CustomOverlayMap
+                                                key={marker.id}
+                                                position={{ lat: marker.lat, lng: marker.lng }}
+                                                yAnchor={1.35}
+                                                zIndex={10}
+                                            >
+                                                <div className="customoverlay">
+                                                    <div style={{color: 'white', fontSize: '12px'}} >
+                                                        {marker.availableCnt}
+                                                    </div>
+                                                </div>
+                                            </CustomOverlayMap>
+                                        )} */}
                                         </MapMarker>
                                         
                                 )
@@ -192,7 +208,7 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                                         zIndex={10}
                                     >
                                         <div className="customoverlay">
-                                            <div style={{color: 'white', fontSize: '12px'}} >
+                                            <div style={{color: 'white', fontSize: '12px', pointerEvents: 'none'}} >
                                                 {marker.availableCnt}
                                             </div>
                                         </div>

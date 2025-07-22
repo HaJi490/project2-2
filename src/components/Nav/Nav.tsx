@@ -55,8 +55,8 @@ export default function Nav() {
       <div className={style.authBox}>
         {isLoggedin ? 
           <div className='flex gap-3'>
-          <button onClick={()=>{route.push('/mypage')}} className='cursor-pointer text-[23px] text-[#666] rounded-full p-2 hover:bg-[#f2f2f2]'><FiUser/></button>
-          <button onClick={()=>{handleLogout()}} className='cursor-pointer text-[23px] text-[#666] rounded-full p-2 hover:bg-[#f2f2f2]'><FiLogOut/></button>
+          <button onClick={()=>route.push('/mypage')} className='cursor-pointer text-[23px] text-[#666] rounded-full p-2 hover:bg-[#f2f2f2]'><FiUser/></button>
+          <button onClick={()=>handleLogout()} className='cursor-pointer text-[23px] text-[#666] rounded-full p-2 hover:bg-[#f2f2f2]'><FiLogOut/></button>
           </div>
           : <button onClick={()=>{route.push('/login')}} className='px-6 py-2 rounded bg-[#4FA969] text-white cursor-pointer'>로그인</button>
         }

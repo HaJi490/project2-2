@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import {Provider as JotaiProvider} from 'jotai';
+import TokenExpireWatcher from "@/components/TokenExpireWatcher";
+import ConditionalNav from "@/components/Nav/ConditionalNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,12 +27,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <script
-          type="text/javascript"
+        <JotaiProvider>
+          <TokenExpireWatcher/>
+          <script
+            type="text/javascript"
             src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JSKEY}&autoload=false&libraries=services,clusterer`}
           ></script>
-        {children}
+          {}
+          <div className="fixed top-0 left-0 w-full z-50">
+            <ConditionalNav/>
+          </div>
+          <main>
+            {children}
+          </main>
+        </JotaiProvider>
       </body>
     </html>
   );

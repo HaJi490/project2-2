@@ -1,12 +1,16 @@
 'use client'
 
 import React, {useState, createContext, useContext, ReactNode} from 'react'
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useAtom } from 'jotai';
+
+import { accessTokenAtom } from '@/store/auth';
 import SidebarItem from './SidebarItem';
 import { 
     LuLayoutDashboard, LuFileText
 } from "react-icons/lu";
-import { FiUser, FiSettings, FiCalendar   } from "react-icons/fi";
+import { FiUser, FiSettings, FiCalendar, FiLogOut } from "react-icons/fi";
 
 
 // 메뉴 아이템 데이터구조
@@ -36,12 +40,23 @@ const navItems = [
 // Context를 사용하여 상태 공유 - props없이 바로 전달가능
 export const SidebarContext = createContext<{ expanded: boolean }>({ expanded: true });
 
+interface SidebarProps {
+    expanded: boolean;
+    setExpanded: (val: boolean) => void;
+}
 
-export default function Sidebar() {
-    const [expanded, setExpanded] = useState(true);
+export default function Sidebar({expanded, setExpanded} : SidebarProps) {
+    const route = useRouter();
+    const [, setToken] = useAtom(accessTokenAtom);
+
+    const handleLogout = () => {
+    setToken(null);
+    // alert("로그아웃 되었습니다.");
+    route.push('/login?toast=로그아웃 되었습니다.');
+  };
 
     return (
-        <aside className= {`h-screen transition-all duration-300 ease-in-out ${expanded ? 'w-72' : 'w-20'}`}>
+        // <aside className= {`h-screen transition-all duration-300 ease-in-out ${expanded ? 'w-72' : 'w-20'}`}>
             <nav className='h-full flex flex-col bg-white shadow-sm'>
                 <div className={` ${expanded? 'p-8 pb-8' : 'p-7'}`}>
                     {expanded
@@ -59,17 +74,20 @@ export default function Sidebar() {
                 </SidebarContext.Provider>
 
                 <div className="border-t flex p-3">
-                    <img src="https://via.placeholder.com/40" alt="Avatar" className="w-10 h-10 rounded-md" />
+                    <img src="/admin_avatar.png" alt="Avatar" className="w-10 h-10 rounded-md" />
                     <div className={`flex justify-between items-center overflow-hidden transition-all ${expanded ? 'w-52 ml-3' : 'w-0'}`}>
                         <div className="leading-4">
                             <h4 className="font-semibold">John Doe</h4>
                             <span className="text-xs text-gray-600">johndoe@gmail.com</span>
                         </div>
-                        <LuFileText size={20} />
+                        <span onClick={()=>handleLogout()}
+                                className='cursor-pointer text-[23px] text-[#666] rounded-full p-2 hover:bg-[#f2f2f2]'>
+                                    <FiLogOut size={20} />
+                        </span>
                     </div>
                 </div>
 
             </nav>
-        </aside>
+        // </aside>
     )
 }

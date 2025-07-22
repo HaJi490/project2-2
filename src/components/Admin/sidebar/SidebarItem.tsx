@@ -1,9 +1,11 @@
 import React, { useContext, useState } from 'react'
 import { SidebarContext } from './Sidebar';
+import { useRouter } from 'next/navigation';
 
 export default function SidebarItem({item} : {item: any}) {
     const {expanded} = useContext(SidebarContext);
     const [submenuOpen, setSubmenuOpen] = useState(false);
+    const route = useRouter();
     
   return (
     <li className='relative flex items-center py-3 px-3 my-1
@@ -11,7 +13,8 @@ export default function SidebarItem({item} : {item: any}) {
                 transition-colors group
                 hover:bg-indigo-50 text-gray-600'>
         {item.icon}
-        <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
+        <span className={`overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}
+                onClick={() => route.push(item.path)}>
             {item.name}
         </span>
 
