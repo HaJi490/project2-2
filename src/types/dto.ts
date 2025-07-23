@@ -1,4 +1,4 @@
-// 전기차충전소 요청dto
+// 📍전기차충전소 요청dto
 export interface CoordinatesDto {
     lat: number;
     lon: number;
@@ -20,6 +20,13 @@ export interface MapQueryDto {
 export interface ChargingStationRequestDto {
     coorDinatesDto: CoordinatesDto;
     mapQueryDto: MapQueryDto;
+}
+
+// n시간후 전기차충전소 요청dto
+export interface ChargingStationPredictionRequestDto {
+    coorDinatesDto: CoordinatesDto;
+    mapQueryDto: MapQueryDto;
+    time: string;
 }
 
 // 전기차충전소 응답dto
@@ -52,11 +59,12 @@ export interface ChargerInfoItem {
     busiNm: string;
 }
 
-export interface ChargerInfoMap {
-    [chgerId: string]: ChargerInfoItem;
-}
+// export interface ChargerInfoMap {
+//     [chgerId: string]: ChargerInfoItem;
+// }
 
-export interface ChargingStationResponseDto {
+// 충전소 공통정보
+export interface BaseChargingStationDto {
     statNm: string;
     statId: string;
     addr: string;
@@ -75,12 +83,28 @@ export interface ChargingStationResponseDto {
     enabledCharger: string[];
     busiId: string;
     busiNm: string;
-    chargerInfo: ChargerInfoMap;
+    chargerInfo: Record<string, ChargerInfoItem>; //ChargerInfoMap;
     useTime: string;
 }
 
+// 현재 충전소 응답 DTO
+export interface ChargingStationResponseDto extends BaseChargingStationDto {
+    // 추가되는 속성이 없으므로 비워둡니다.
+}
 
-// 회원가입 reqest
+// N시간 후 예측 충전소 응답 DTO
+export interface ChargingStationPredictionResponseDto extends BaseChargingStationDto {
+    // 예측 DTO에만 있는 속성만 여기에 추가합니다.
+    totalNacsNum: number;
+    chargingDemand: number;
+}
+
+// 리스트 패널의 아이템을 위한 새로운 타입을 선언합니다.
+export interface StationListItem extends ChargingStationResponseDto {
+    changeStatus: 'increase' | 'decrease' | 'same' | 'none';
+}
+
+// 📍회원가입 reqest
 export interface SignupRequest {
     username: string;
     nickname: string;

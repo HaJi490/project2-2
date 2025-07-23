@@ -8,8 +8,7 @@ import { useAtom } from 'jotai';
 
 
 import style from './Nav.module.css'
-import { FiUser } from "react-icons/fi";
-import { FiLogOut } from "react-icons/fi";
+import { FiUser, FiLogOut } from "react-icons/fi";
 import Link from 'next/link';
 import { setLazyProp } from 'next/dist/server/api-utils';
 import { accessTokenAtom, isLoggedInAtom } from '@/store/auth';
