@@ -6,6 +6,7 @@ import { StationListItem, ChargerInfoMap, ChargerInfoItem } from '@/types/dto'
 import codeToNm from '../../../db/chgerType.json'
 import { IoCalendarClearOutline } from "react-icons/io5";
 import { FiBattery, FiBatteryCharging, FiXCircle } from "react-icons/fi";
+import { LuDot } from "react-icons/lu";
 
 interface StationDetailPanalProps {
     selectedStation: StationListItem | null;
@@ -201,19 +202,19 @@ export default function StationDetailPanal({
                                 <p className='text-sm text-gray-500 flex items-center'>
                                     <span className='text-gray-900 font-medium mr-4 w-15'>운영시간</span>
                                     <span className='flex items-center'>
-                                        {selectedStation.busiNm}
+                                        {selectedStation.useTime}
                                     </span>
                                 </p>
                             }
                             <p className='text-sm text-gray-500 flex items-center'>
-                                <span className='text-gray-900 font-medium mr-4 w-15'>운영시간</span>
+                                <span className='text-gray-900 font-medium mr-4 w-15'>운영기관</span>
                                 <span className='flex items-center'>
-                                    {selectedStation.useTime}
+                                    {selectedStation.busiNm}
                                 </span>
                             </p>
                         </div>
                         {/* 충전기 현황 */}
-                        <div className='w-fit bg-[#f2f2f2] px-3 py-1 flex gap-3 rounded-md'>
+                        {/* <div className='w-fit bg-[#f2f2f2] px-3 py-1 flex gap-3 rounded-md'>
                             {selectedStation.totalFastNum > 0 &&
                                 <p className='text-[12px] font-bold'>
                                     <span className='mr-1'>급속</span>
@@ -235,7 +236,7 @@ export default function StationDetailPanal({
                                     <span className='text-[#b6b6b6]'>/ {selectedStation.totalSlowNum}</span>
                                 </p>
                             }
-                        </div>
+                        </div> */}
                         {/* <div className='flex justify-center items-center gap-5'>
                             <button>
                                 길찾기
@@ -255,7 +256,16 @@ export default function StationDetailPanal({
                             {Object.entries(groupedAndSortedChargers).map(
                                 ([type, chargers]) => (
                                     <div key={type} className='mb-5'>
-                                        <h5 className='font-medium text-[13px] text-[#666] mb-2 '>{type}</h5>
+                                        <h5 className='font-medium text-[13px] text-[#666] mb-2 flex'>
+                                            {type.split('+').map((part, idx, arr) => (
+                                                <React.Fragment key={idx}>
+                                                    <span>{part}</span>
+                                                    {idx < arr.length - 1 && (
+                                                        <span className='text-[#afafaf] mt-1'><LuDot/></span>
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </h5>
                                         <div className='grid grid-cols-1 gap-2'>
                                             {chargers.map((charger) => {
                                                 const statusInfo = getChargerStatusInfo(charger.stat);
@@ -269,8 +279,8 @@ export default function StationDetailPanal({
                                                         disabled={!statusInfo.available}                //📅예약
                                                         className={`p-3 border rounded text-left transitions-colors
                                                             ${isCanUse 
-                                                                ?'border-[#4FA969] hover:bg-green-50 cursor-pointer'
-                                                                : `border-gray-300 ${isCharging ? 'bg-white' : 'bg-gray-300 cursor-not-allowed'}`   //📅예약
+                                                                ?'border-[#4FA969] bg-green-50 cursor-pointer'
+                                                                : `border-gray-300 ${isCharging ? 'bg-white' : 'bg-[#f2f2f2] cursor-not-allowed'}`   //📅예약
                                                             }`}
                                                     >
                                                         <div className='flex justify-between items-center mb-2'>
