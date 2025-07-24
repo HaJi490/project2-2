@@ -30,7 +30,7 @@ export default function Nav() {
 
   const handleLogout = () => {
     setToken(null);
-    // alert("로그아웃 되었습니다.");
+    // localStorage.removeItem('accessToken');
     route.push('/login?toast=로그아웃 되었습니다.');
   };
 

@@ -6,7 +6,6 @@ import axios from 'axios';
 import Image from "next/image"
 import { useAtom } from "jotai";
 import { jwtDecode } from "jwt-decode";
-
 import Toast from "@/components/Toast/Toast";
 import { IoMdHome } from "react-icons/io";
 import Link from "next/link";
@@ -52,8 +51,8 @@ export default function page() {
 
       const decode: TokenPayload = jwtDecode(token);
       const userRole = decode.role;
-      const expireAt = decode.exp * 1000; // jwt는 초단위이므로, ms단위로 변환 
-      // const expireAt = Date.now() + 1000 * 60 * 60 * 2; // 2시간 후 만료
+      // const expireAt = decode.exp * 1000; // jwt는 초단위이므로, ms단위로 변환 
+      const expireAt = Date.now() + 1000 * 60 * 60 * 2; // 2시간 후 만료
 
       setRoleAtom(userRole[0] as 'ROLE_MANAGER' | 'ROLE_MEMBER' | 'ROLE_GUEST');
       console.log(roleAtom);
@@ -75,13 +74,13 @@ export default function page() {
     }
   }
 
-  
+
 
   return (
     <div className="min-h-screen flex flex-col">
       <Toast message={toastMsg} setMessage={setToastMsg}/>
         <span className="text-[12px] text-[#afafaf] flex"><IoMdHome />&nbsp;{'>'} 로그인</span>
-        <main className='w-screen flex-grow flex flex-col justify-center items-center bg-white px-4 pb-[100px]'>
+        <main className='w-screen flex-grow flex flex-col justify-center items-center bg-white px-4 pb-[30px]'>
           {/* <span className="text-red-500">OR에 border 안생김(크기조정하면 있긴함)</span> */}
           <form className="w-5/10 max-w-[400px] sm:w-96 px-6" onSubmit={e =>  login(e)}>
             <h2 className='text-center font-medium text-[28px] tracking-wide mb-6'>로그인</h2>
@@ -109,9 +108,15 @@ export default function page() {
             <hr className="flex-grow border-t border-[#666]"/>
           </div>
           <div className="flex justify-center gap-6">
-            <Image src="/Group 11.png" alt='gw로고' width={50} height={50} priority/>
-            <Image src="/Group 12.png" alt='gw로고' width={50} height={50} priority/>
-            <Image src="/Group 13.png" alt='gw로고' width={50} height={50} priority/>
+            <Link href= {`http://${process.env.NEXT_PUBLIC_BACKIP}:8080/oauth2/authorization/naver`} >
+              <Image className="cursor-pointer " src="/Group 11.png" alt='gw11로고' width={40} height={40} priority/>
+            </Link>
+            <Link href={`http://${process.env.NEXT_PUBLIC_BACKIP}:8080/oauth2/authorization/kakao`}>
+              <Image className="cursor-pointer" src="/Group 12.png" alt='gw12로고' width={40} height={40} priority/>
+            </Link>
+            <Link href={`http://${process.env.NEXT_PUBLIC_BACKIP}:8080/oauth2/authorization/github`}>
+              <Image className="cursor-pointer" src="/Group 13.png" alt='gw13로고' width={40} height={40} priority/>
+            </Link>
           </div>
               
         </main>

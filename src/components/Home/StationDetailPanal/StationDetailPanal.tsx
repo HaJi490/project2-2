@@ -2,11 +2,13 @@
 
 import React, { useRef, useEffect, useState, useMemo } from 'react'
 
+import ReservationPanel from './ReservationPanel'
 import { StationListItem, ChargerInfoMap, ChargerInfoItem } from '@/types/dto'
 import codeToNm from '../../../db/chgerType.json'
 import { IoCalendarClearOutline } from "react-icons/io5";
 import { FiBattery, FiBatteryCharging, FiXCircle } from "react-icons/fi";
 import { LuDot } from "react-icons/lu";
+import { BiSolidNavigation } from "react-icons/bi";
 
 interface StationDetailPanalProps {
     selectedStation: StationListItem | null;
@@ -30,6 +32,7 @@ export default function StationDetailPanal({
     closeDetailRef
 }: StationDetailPanalProps) {
     const panelRef = useRef<HTMLDivElement>(null);
+    const [viewMode, setviewMode] = useState<'reserv'| 'navi' | null>(null);
     const [showReserv, setShowReserv] = useState<boolean>(false);
     const [selectedCharger, setSelectedCharger] = useState<ChargerInfoItem | null>(null);
 
@@ -104,7 +107,6 @@ export default function StationDetailPanal({
 
     // 충전기 상태 정보 가져오기
     const getChargerStatusInfo = (stat: string) => {
-        console.log('stat: ', stat)
         return CHARGER_STATUS[stat as keyof typeof CHARGER_STATUS] || CHARGER_STATUS['9']
     }
 
@@ -140,12 +142,23 @@ export default function StationDetailPanal({
 
     },[selectedStation])
 
+    // 예약모드로 변경
+    const handleModeReserv = () => {
+        
+        if(viewMode !== 'reserv'){
+            setviewMode('reserv');
+        } else{
+            setviewMode(null);
+        }
+        console.log(viewMode)
+    }
+
     // 예약화면 띄우기
     const handleChargerReservation = (charger: ChargerInfoItem) => {
         // 상태에따라 예약여부결정
         // const statusInfo = getChargerStatusInfo(charger.stat);
         // if (!statusInfo.available) {
-        //     alert('현재 예약할 수 없는 충전기입니다.')
+        //     setToastMsg('현재 예약할 수 없는 충전기입니다.')
         //     return
         // }
 
@@ -159,6 +172,11 @@ export default function StationDetailPanal({
         setSelectedCharger(null);   // undefined?
     }
 
+    useEffect(() => {
+        // selectedStation이 변경될 때마다 viewMode를 초기 상태(null)
+        setviewMode(null);
+    }, [selectedStation]);
+
     // 0. selectedStation이 null인 경우 렌더링하지 않음 
     // 제일 위쪽에 둘 경우, '훅의 규칙(Rules of Hooks)' 위반으로 어떤경우에는 밑에 훅들이 렌더링안되서 오류가뜸!
     if (!selectedStation) return null;
@@ -167,7 +185,7 @@ export default function StationDetailPanal({
         <>
             <div
                 ref={panelRef}
-                className='absolute top-105 left-162 h-full -translate-x-1/2 -translate-y-1/2 bg-white  rounded-lg shadow-xl z-20 w-100 max-h-[80vh]'
+                className='absolute top-103 left-162 h-full -translate-x-1/2 -translate-y-1/2 bg-white  rounded-lg shadow-xl z-20 w-100 max-h-[85vh]'
             >
                 {/* overflow-y-auto, relative */}
                 <div className='h-full flex flex-col relative'>
@@ -237,19 +255,19 @@ export default function StationDetailPanal({
                                 </p>
                             }
                         </div> */}
-                        {/* <div className='flex justify-center items-center gap-5'>
+                        <div className='flex justify-center items-center gap-5'>
                             <button>
                                 길찾기
                             </button>
-                            <button>
+                            <button className='cursor-pointer' onClick={()=>handleModeReserv()}>
+                                <IoCalendarClearOutline/>
                                 예약
                             </button>
-                            <button>
-                                즐겨찾기
-                            </button>
-                        </div> */}
+                        </div>
                     </header>
                     {/* 실시간 충전현황 */}
+                    {viewMode !== 'reserv'
+                    ?(
                     <div className='flex-1 overflow-y-auto px-6'>
                         <h4 className="font-semibold text-gray-800 mb-3">실시간 충전현황</h4>
                         <div className='grid grid-cols-1 gap-2'>
@@ -273,14 +291,14 @@ export default function StationDetailPanal({
                                                 const isCanUse = charger.stat === '2'; // '충전대기'
 
                                                 return(
-                                                    <button 
+                                                    <div 
                                                         key={charger.chgerId}
-                                                        onClick={()=>handleChargerReservation(charger)} //📅예약
-                                                        disabled={!statusInfo.available}                //📅예약
+                                                        // onClick={()=>handleChargerReservation(charger)} //📅예약
+                                                        // disabled={!statusInfo.available}                //📅예약
                                                         className={`p-3 border rounded text-left transitions-colors
                                                             ${isCanUse 
-                                                                ?'border-[#4FA969] bg-green-50 cursor-pointer'
-                                                                : `border-gray-300 ${isCharging ? 'bg-white' : 'bg-[#f2f2f2] cursor-not-allowed'}`   //📅예약
+                                                                ?'border-[#4FA969] bg-green-50 '
+                                                                : `border-gray-300 ${isCharging ? 'bg-white' : 'bg-[#f2f2f2]'}`   //📅예약
                                                             }`}
                                                     >
                                                         <div className='flex justify-between items-center mb-2'>
@@ -298,6 +316,68 @@ export default function StationDetailPanal({
                                                         <p className="text-xs text-gray-500">
                                                             {getTimeAgo(charger.lastTsdt)}
                                                         </p>
+                                                    </div>
+                                                )
+                                            })}
+
+                                        </div>
+                                    </div>
+                                ) 
+                            )}
+                        </div>
+                    </div>
+                    )
+                    :(
+                        <div className='flex-1 overflow-y-auto px-6'>
+                        <h4 className="font-semibold text-gray-800 mb-3">충전 예약하기</h4>
+                        {/* <p className='text-[13px] text-gray-500'>충전기를 선택해주세요</p> */}
+                        <div className='grid grid-cols-1 gap-2'>
+                            {Object.entries(groupedAndSortedChargers).map(
+                                ([type, chargers]) => (
+                                    <div key={type} className='mb-5'>
+                                        <h5 className='font-medium text-[13px] text-[#666] mb-2 flex'>
+                                            {type.split('+').map((part, idx, arr) => (
+                                                <React.Fragment key={idx}>
+                                                    <span>{part}</span>
+                                                    {idx < arr.length - 1 && (
+                                                        <span className='text-[#afafaf] mt-1'><LuDot/></span>
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </h5>
+                                        <div className='grid grid-cols-1 gap-2'>
+                                            {chargers.map((charger) => {
+                                                const statusInfo = getChargerStatusInfo(charger.stat);
+                                                const isCharging = charger.stat === '3'; // '충전중'상태인지 별도로 확인
+                                                const isCanUse = charger.stat === '2'; // '충전대기'
+
+                                                return(
+                                                    <button 
+                                                        key={charger.chgerId}
+                                                        onClick={()=>handleChargerReservation(charger)} 
+                                                        disabled={!statusInfo.available}                
+                                                        className={`p-3 border rounded text-left transitions-colors
+                                                            ${isCanUse || isCharging 
+                                                                ?'bg-white border-[#cef0d7] drop-shadow-md focus:bg-green-50 hover:bg-green-50 focus:border-[#4FA969] hover:border-[#4FA969] cursor-pointer'
+                                                                : `border-gray-300 bg-[#f2f2f2] cursor-not-allowed`  //📅예약
+                                                            }`}
+                                                    >
+                                                        <div className='flex justify-between items-center mb-2'>
+                                                            <div className='flex items-center gap-2'>
+                                                                {/* <span className={``}>{statusInfo.icon}</span> */}
+                                                                <span className={`font-bold ${isCanUse || isCharging ? '' : 'text-[#666]'}`}>
+                                                                    {statusInfo.text}
+                                                                </span>
+                                                            </div>
+                                                            <span className={`font-bold text-[#666]`}>{charger.chgerId}</span>
+                                                        </div>
+                                                        <p className="text-sm text-gray-600 mb-1">
+                                                            {/* <span className='text-gray-900 font-medium mr-4 w-15'>충전용량</span> */}
+                                                            {charger.output}kW
+                                                        </p>
+                                                        {/* <p className="text-xs text-gray-500">
+                                                            {getTimeAgo(charger.lastTsdt)}
+                                                        </p> */}
                                                     </button>
                                                 )
                                             })}
@@ -308,7 +388,14 @@ export default function StationDetailPanal({
                             )}
                         </div>
                     </div>
-
+                    )
+                    }
+                    {showReserv && selectedCharger &&(
+                        <ReservationPanel 
+                            charger={selectedCharger}
+                            onClose={handleCloseReservation}
+                        />
+                    )}
                 </div>
             </div>
         </>
