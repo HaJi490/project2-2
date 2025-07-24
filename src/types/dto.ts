@@ -59,9 +59,9 @@ export interface ChargerInfoItem {
     busiNm: string;
 }
 
-// export interface ChargerInfoMap {
-//     [chgerId: string]: ChargerInfoItem;
-// }
+export interface ChargerInfoMap {
+    [chgerId: string]: ChargerInfoItem;
+}
 
 // 충전소 공통정보
 export interface BaseChargingStationDto {

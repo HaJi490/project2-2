@@ -15,6 +15,8 @@ interface ChargingMapProps {
     mapCenter: [number, number] | null;
     predictHours: number;
     onHoursChange: React.Dispatch<React.SetStateAction<number>>; // setter 타입
+    onMarkerClick: (markerId: string) => void;
+    selectionSource : 'list' | 'map' | null;
 }
 
 type MarkerType = {
@@ -53,7 +55,18 @@ type InfoWindowState = {
 } | null;
 
 
-export default function ChargingMap({ myPos, radius, mapCenter, markers, selectedStationId, posHere, predictHours, onHoursChange }: ChargingMapProps) {
+export default function ChargingMap({ 
+    myPos, 
+    radius, 
+    mapCenter, 
+    markers, 
+    selectedStationId, 
+    posHere, 
+    predictHours, 
+    onHoursChange,
+    onMarkerClick,
+    selectionSource
+}: ChargingMapProps) {
     const [map, setMap] = useState<kakao.maps.Map>(null); // 지도인스턴스 저장
     const [infoWindow, setInfoWindow] = useState<InfoWindowState>(null);
     const [currentZoom, setCurrentZoom] = useState(5);
@@ -74,10 +87,10 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
         libraries: ["clusterer", "services"],
     });
 
-    // 2. 선택된 충전소 변경시 지도중심 이동 및 확대- mapCenter
+    // 2. 선택된 충전소 변경시 지도중심 이동 및 확대- mapCenter(리스트->지도)
     useEffect(() => {
         console.log('[ChargingMap] 2.선택된 충전소 변경시')
-        if (!map || !selectedStationId) return;
+        if (!map || !selectedStationId || selectionSource !== 'list') return;
 
         const selectedMarker = markers.find(marker => marker.id === selectedStationId);
 
@@ -85,8 +98,16 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
             const position = new kakao.maps.LatLng(selectedMarker.lat, selectedMarker.lng);
             map.setLevel(3, { anchor: position }); // 레벨 3으로 확대
             map.panTo(position); // 부드럽게 이동
+        
+            // infoWindow열기
+            setInfoWindow({
+                position: {lat: selectedMarker.lat, lng: selectedMarker.lng},
+                content: selectedMarker.name,
+                stationId: selectedMarker.id,
+                chargerTypes: selectedMarker.chargerTypes,
+            })
         }
-    }, [selectedStationId, map]);
+    }, [selectedStationId, selectionSource, map, markers]);
 
     // 3. mapCenter prop변경시 지도 중심 이동
     useEffect(() => {
@@ -112,12 +133,13 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
         }
     }
 
-    // 5. 마커클릭 핸들러
+    // 5. 마커클릭 핸들러(지도->리스트)
     const handleMarkerClick = (marker: MarkerType) => {
         console.log('[ChargingMap] 5. 마커클릭 시');
         if(infoWindow && infoWindow.stationId === marker.id){
             // 이미 선택된 마커를 다시 클릭하면 정보창 닫기
             setInfoWindow(null); 
+            onMarkerClick(''); //빈문자열로 선택해제 알림
         } else{
             // 새로운 마커 클릭시 정보창 열기
             setInfoWindow({
@@ -126,6 +148,8 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                 stationId: marker.id,
                 chargerTypes: marker.chargerTypes,
             });
+
+            onMarkerClick(marker.id); // 부모에 마커클릭알림
         }
     }
 
@@ -255,7 +279,7 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                         <div className='px-5 py-2 flex gap-2 justify-center bg-[#F7FECD] border-[#CACFAC] rounded-full shadow-lg'>
                             {/* 충전기 타입별 개수 */}
                             {/* 급속 충전기 */}
-                                {infoWindow.chargerTypes.fastCount > 0 && (
+                                {infoWindow.chargerTypes.fastTotal > 0 && (
                                     <div className='text-[12px] font-bold'>
                                         <span className='mr-1'>급</span>
                                         {infoWindow.chargerTypes.fastCount}
@@ -264,7 +288,7 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                                 )}
                                 
                                 {/* 중속 충전기 */}
-                                {infoWindow.chargerTypes.midCount > 0 && (
+                                {infoWindow.chargerTypes.midTotal > 0 && (
                                     <div className='text-[12px] font-bold'>
                                         <span className='mr-1'>중</span>
                                         {infoWindow.chargerTypes.midCount}
@@ -273,7 +297,7 @@ export default function ChargingMap({ myPos, radius, mapCenter, markers, selecte
                                 )}
                                 
                                 {/* 완속 충전기 */}
-                                {infoWindow.chargerTypes.slowCount > 0 && (
+                                {infoWindow.chargerTypes.slowTotal > 0 && (
                                     <div className='text-[12px] font-bold'>
                                         <span className='mr-1'>완</span>
                                         {infoWindow.chargerTypes.slowCount}

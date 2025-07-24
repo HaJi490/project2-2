@@ -50,7 +50,8 @@ export default function Home() {
   });
   const [myPos, setMyPos] = useState<[number, number] | null >(null);           // 맵에 쓰일 현재위치 _ 반경표시
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);    // 맵의 중심  // 초기값설정해두면 fetch가 두번 반복되기 때문에 맵에 그려질 수도 있고 아닐 때도 있는거
-  const [selectedStation, setSelectedStation] = useState<ChargingStationResponseDto | null >(null);     // 선택된 충전소
+  const [selectedStation, setSelectedStation] = useState<StationListItem | null >(null);     // 선택된 충전소
+  const [selectionSource, setSelectionSource] = useState<'list'| 'map'| null>(null);   // 선택이 어디서왔는지(list/map)
 
   const [viewMode, setViewMode] = useState<'current' | 'prediction'>('current'); // 현재모드 관리
   const [predictionHours, setPredictionHours] = useState<number>(0);             // 몇시간 후 예측인지
@@ -337,14 +338,33 @@ export default function Home() {
     }
   }, [currentFilter, myPos]) // 해당 디펜던시 값이 변할때 정보 업데이트
 
-  // 3. 충전소 클릭
+  // 3. 충전소 클릭(리스트 -> 마커)
   const handleStationClick = useCallback((station:StationListItem | null)=>{
-    if(!station) setSelectedStation(null);
-    
+    console.log('[Home] 3. 리스트에서 충전소 선택:', station);
+
+    if(!station) {
+      setSelectedStation(null);
+      setSelectionSource(null);
+    }
+
+    setSelectionSource('list'); // 리스트 선택 표시
     setMapCenter([station.lat, station.lng]);
     setSelectedStation(station);
     console.log('선택한 충전소 정보: ', station);
   },[])
+
+  // 3-2. 마커클릭 처리(지도 -> 리스트)
+  const handleMapMarkerClick = useCallback((markerId: string) => {
+    console.log('[Home] 3. 지도에서 마커 선택', markerId);
+
+    // 해당마커의 상세정보 listItem에서 찾기
+    const selectedStationFromList = listItems.find(item => item.statId === markerId);
+
+    if(selectedStationFromList){
+      setSelectionSource('map'); // 지도에서 선택 표시
+      setSelectedStation(selectedStationFromList);
+    }
+  },[listItems])
 
 
   return (
@@ -357,13 +377,23 @@ export default function Home() {
           onFilterChange={handleFilterChange}
           onStationClick={handleStationClick}
           onSearch={handleSearch}
+          selectedStation = {selectedStation}
+          selectionSource = {selectionSource}
         />
       </div>
       <div className="flex-grow h-full relative ">
         {myPos && mapCenter && markers.length > 0 &&
-          <ChargingMap myPos={myPos} radius={currentFilter.radius} mapCenter={mapCenter} 
-                      markers={markers} posHere={handleSearchHere}
-                      predictHours = {predictionHours} onHoursChange={handlePredictionHours}/>
+          <ChargingMap myPos={myPos} 
+                      radius={currentFilter.radius} 
+                      mapCenter={mapCenter} 
+                      markers={markers} 
+                      posHere={handleSearchHere}  
+                      selectedStationId={selectedStation?.statId}
+                      predictHours = {predictionHours} 
+                      onHoursChange={handlePredictionHours}
+                      onMarkerClick = {handleMapMarkerClick}
+                      selectionSource = {selectionSource}
+          />
         }
       </div>
     </div>
