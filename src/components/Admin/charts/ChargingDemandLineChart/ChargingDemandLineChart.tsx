@@ -15,38 +15,58 @@ import style from './ChargingDemandLineChart.module.css'
 
   // 1. 한달 수요 예측 데이터
   const forecastData = [
-    { date: '2025-07-21', demand: 120 },
-  { date: '2025-07-22', demand: 135 },
-  { date: '2025-07-23', demand: 110 },
-  { date: '2025-07-24', demand: 98 },
-  { date: '2025-07-25', demand: 115 },
-  { date: '2025-07-26', demand: 140 },
-  { date: '2025-07-27', demand: 162 },
-  { date: '2025-07-28', demand: 180 },
-  { date: '2025-07-29', demand: 167 },
-  { date: '2025-07-30', demand: 148 },
-  { date: '2025-07-31', demand: 145 },
-  { date: '2025-08-01', demand: 140 },
-  { date: '2025-08-02', demand: 134 },
-  { date: '2025-08-03', demand: 122 },
-  { date: '2025-08-04', demand: 108 },
-  { date: '2025-08-05', demand: 122 },
-  { date: '2025-08-06', demand: 107 },
-  { date: '2025-08-07', demand: 124 },
-  { date: '2025-08-08', demand: 131 },
-  { date: '2025-08-09', demand: 113 },
-  { date: '2025-08-10', demand: 94 },
-  { date: '2025-08-11', demand: 90 },
-  { date: '2025-08-12', demand: 90 },
-  { date: '2025-08-13', demand: 90 },
-  { date: '2025-08-14', demand: 102 },
-  { date: '2025-08-15', demand: 120 },
-  { date: '2025-08-16', demand: 101 },
-  { date: '2025-08-17', demand: 116 },
-  { date: '2025-08-18', demand: 108 },
-  { date: '2025-08-19', demand: 122 },
-  { date: '2025-08-20', demand: 128 }
+  // { date: '2025-07-21', demand: 120 },
+  // { date: '2025-07-22', demand: 135 },
+  // { date: '2025-07-23', demand: 110 },
+  // { date: '2025-07-24', demand: 98 },
+  // { date: '2025-07-25', demand: 115 },
+  // { date: '2025-07-26', demand: 140 },
+  // { date: '2025-07-27', demand: 162 },
+  // { date: '2025-07-28', demand: 180 },
+  // { date: '2025-07-29', demand: 167 },
+  // { date: '2025-07-30', demand: 148 },
+  // { date: '2025-07-31', demand: 145 },
+  // { date: '2025-08-01', demand: 140 },
+  // { date: '2025-08-02', demand: 134 },
+  // { date: '2025-08-03', demand: 122 },
+  // { date: '2025-08-04', demand: 108 },
+  // { date: '2025-08-05', demand: 122 },
+  // { date: '2025-08-06', demand: 107 },
+  // { date: '2025-08-07', demand: 124 },
+  // { date: '2025-08-08', demand: 131 },
+  // { date: '2025-08-09', demand: 113 },
+  // { date: '2025-08-10', demand: 94 },
+  // { date: '2025-08-11', demand: 90 },
+  // { date: '2025-08-12', demand: 90 },
+  // { date: '2025-08-13', demand: 90 },
+  // { date: '2025-08-14', demand: 102 },
+  // { date: '2025-08-15', demand: 120 },
+  // { date: '2025-08-16', demand: 101 },
+  // { date: '2025-08-17', demand: 116 },
+  // { date: '2025-08-18', demand: 108 },
+  // { date: '2025-08-19', demand: 122 },
+  // { date: '2025-08-20', demand: 128 }
+  { chgerId: 'CSCS2015', week: 'Monday', demand: 19.776451612903223 },
+  { chgerId: 'CSCS2015', week: 'Tuesday', demand: 27.214499999999994 },
+  { chgerId: 'CSCS2015', week: 'Wednesday', demand: 22.267000000000003 },
+  { chgerId: 'CSCS2015', week: 'Thursday', demand: 21.98606060606061 },
+  { chgerId: 'CSCS2015', week: 'Friday', demand: 23.62666666666667 },
+  { chgerId: 'CSCS2015', week: 'Saturday', demand: 22.694242424242432 }
   ];
+
+  const dayKor = {
+    Sunday: '일',
+    Monday: '월',
+    Tuesday: '화',
+    Wednesday: '수',
+    Thursday: '목',
+    Friday: '금',
+    Saturday: '토',
+  };
+
+  // 한글 요일 정렬 기준
+  const korDayOrder = ['일', '월', '화', '수', '목', '금', '토'];
+
 
   // 2. 마우스를 올렸을 때 보여줄 커스텀 툴팁 컴포넌트
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -54,7 +74,7 @@ import style from './ChargingDemandLineChart.module.css'
       return (
         <div className={style.custom_tooltip}>
           <p className={style.custom_label}>{`수요량: ${payload[0].value}`}</p>
-          <p className={style.custom_intro}>{`날짜: ${label}`}</p>
+          <p className={style.custom_intro}>{`요일: ${label}`}</p>
         </div>
       );
     }
@@ -63,7 +83,7 @@ import style from './ChargingDemandLineChart.module.css'
 
 export default function ChargingDemandLineChart() {
 
-  // 3. 차트 클릭 시 실행될 함수-------------------------------------❗클릭했을때 데이터 못가져옴
+  // 3. 차트 클릭 시 실행될 함수
   const handleChartClick = (chartState: any) => {
     // chartState.activePayload: 클릭된 지점의 데이터가 배열
     if (chartState && chartState.activePayload && chartState.activePayload.length > 0) {  
@@ -84,12 +104,25 @@ export default function ChargingDemandLineChart() {
     }
   };
 
+  // 데이터 변환 + 정렬
+  const converted = forecastData.map( item => {
+    const kor = dayKor[item.week];
+
+    return {
+      ...forecastData,
+      week: kor,
+    }
+  }).sort((a, b) => korDayOrder.indexOf(a.week) - korDayOrder.indexOf(b.week));
+
+  console.log(converted);
+
 
   return (
     <div className='w-full h-[350px]'>
       <ResponsiveContainer>
         <AreaChart data={forecastData} onClick={handleChartClick} 
                   margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
+
           {/* 그라데이션 효과 정의 */}
           <defs>
             <linearGradient id='colorDemand' x1='0' y1='0' x2='0' y2='1'>
@@ -97,13 +130,17 @@ export default function ChargingDemandLineChart() {
               <stop offset='95%' stopColor='#4FA969' stopOpacity={0}/>
             </linearGradient>
           </defs>
+
           {/* X축 (날짜). tickFormatter로 날짜 형식을 보기 좋게 변경 */}
-          <XAxis dataKey='date' tickFormatter={(dateStr) => new Date(dateStr).getDate() + '일'}
+          <XAxis dataKey='week' tickFormatter={(week)=>dayKor(week)}        // (dateStr) => new Date(dateStr).getDate() + '일'
                 tick={{fill: '#888888'}} fontSize={12} dy={10}/>
+
           {/* y축(수요량) */}
           <YAxis tick={{fill: '#888888'}} fontSize={12}/>
+
           {/* 배경그리드 */}
           <CartesianGrid strokeDasharray={'3 3'} vertical={false}/>
+
           {/* 커스텀 툴팁 연결 _ 컴포넌트? */}
           <Tooltip content={<CustomTooltip/>} /> 
 

@@ -342,15 +342,16 @@ export default function Home() {
   const handleStationClick = useCallback((station:StationListItem | null)=>{
     console.log('[Home] 3. 리스트에서 충전소 선택:', station);
 
-    if(!station) {
+    if(station) {
+      setSelectionSource('list'); // 리스트 선택 표시
+      setMapCenter([station.lat, station.lng]);
+      setSelectedStation(station);
+      console.log('선택한 충전소 정보: ', station);
+    } else{
       setSelectedStation(null);
       setSelectionSource(null);
     }
 
-    setSelectionSource('list'); // 리스트 선택 표시
-    setMapCenter([station.lat, station.lng]);
-    setSelectedStation(station);
-    console.log('선택한 충전소 정보: ', station);
   },[])
 
   // 3-2. 마커클릭 처리(지도 -> 리스트)

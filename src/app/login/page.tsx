@@ -51,8 +51,8 @@ export default function page() {
 
       const decode: TokenPayload = jwtDecode(token);
       const userRole = decode.role;
-      // const expireAt = decode.exp * 1000; // jwt는 초단위이므로, ms단위로 변환 
-      const expireAt = Date.now() + 1000 * 60 * 60 * 2; // 2시간 후 만료
+      const expireAt = decode.exp * 1000; // jwt는 초단위이므로, ms단위로 변환 
+      // const expireAt = Date.now() + 1000 * 60 * 60 * 2; // 2시간 후 만료
 
       setRoleAtom(userRole[0] as 'ROLE_MANAGER' | 'ROLE_MEMBER' | 'ROLE_GUEST');
       console.log(roleAtom);

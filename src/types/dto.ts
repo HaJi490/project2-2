@@ -87,21 +87,54 @@ export interface BaseChargingStationDto {
     useTime: string;
 }
 
-// 현재 충전소 응답 DTO
+// (Member) 현재 충전소 응답 DTO
 export interface ChargingStationResponseDto extends BaseChargingStationDto {
     // 추가되는 속성이 없으므로 비워둡니다.
 }
 
-// N시간 후 예측 충전소 응답 DTO
+// (Member) N시간 후 예측 충전소 응답 DTO
 export interface ChargingStationPredictionResponseDto extends BaseChargingStationDto {
     // 예측 DTO에만 있는 속성만 여기에 추가합니다.
     totalNacsNum: number;
     chargingDemand: number;
 }
 
-// 리스트 패널의 아이템을 위한 새로운 타입을 선언합니다.
+// (Member) 리스트 패널의 아이템을 위한 새로운 타입을 선언합니다.
 export interface StationListItem extends ChargingStationResponseDto {
     changeStatus: 'increase' | 'decrease' | 'same' | 'none';
+}
+
+// (Manager) 대시보드 히트맵 응답
+export interface ActualChargingStationData {
+    statNm: string;
+    statId: string;
+    addr: string;
+    // useTime은 문자열일 수도, null일 수도 있습니다.
+    useTime: string | null;
+    lat: number;
+    lng: number;
+    parkingFree: boolean;
+    limitYn: boolean;
+    totalChargeNum: number;
+    totalFastNum: number;
+    totalSlowNum: number;
+    chargeFastNum: number;
+    chargeSlowNum: number;
+    totalMidNum: number;
+    chargeMidNum: number;
+    // 새로 추가된 필드
+    totalNacsNum: number; 
+    // 새로 추가된 필드
+    chargingDemand: number;
+    chargeNum: number;
+    // enabledCharger는 문자열 배열이거나 null일 수 있습니다.
+    enabledCharger: string[] | null;
+    busiId: string;
+    busiNm: string;
+    // chargerInfo는 객체이거나 null일 수 있습니다.
+    // ChargerInfoItem 타입을 모르므로 우선 'any'로 지정하고,
+    // 나중에 정확한 타입으로 교체하는 것을 권장합니다.
+    chargerInfo: Record<string, any> | null; 
 }
 
 // 📍회원가입 reqest

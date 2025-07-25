@@ -16,6 +16,39 @@
     /* shadow-lg */
 }
 
+/* ------------------------------------------- */
+/* 5. 커스텀 상태 스타일 (가장 중요)             */
+/* ------------------------------------------- */
+
+/* 현재 달이 아닌 날짜 (예: 1월 달력에 보이는 12월, 2월 날짜) */
+.my-outside {
+    color: #9ca3af;
+    /* text-gray-400 */
+    opacity: 0.6;
+    /* opacity-60 */
+}
+
+/* 오늘 날짜 (선택되지 않았을 때) */
+.my-today {
+    border: 1px solid #d1d5db;
+    /* border border-gray-300 */
+    font-weight: 600;
+}
+
+/* ⭐ 선택된 날짜 ⭐ */
+.my-selected {
+    background-color: #111827;
+    /* bg-black */
+    color: white;
+}
+
+/* 선택된 날짜에 호버/포커스해도 스타일이 변하지 않도록 고정 */
+.my-selected:hover,
+.my-selected:focus {
+    background-color: #111827 !important;
+    color: white !important;
+}
+
 
 /* ------------------------------------------- */
 /* 2. 헤더 (월/년도, 이전/다음 버튼)            */
@@ -176,35 +209,3 @@
 }
 
 
-/* ------------------------------------------- */
-/* 5. 커스텀 상태 스타일 (가장 중요)             */
-/* ------------------------------------------- */
-
-/* 현재 달이 아닌 날짜 (예: 1월 달력에 보이는 12월, 2월 날짜) */
-.my-outside {
-    color: #9ca3af;
-    /* text-gray-400 */
-    opacity: 0.6;
-    /* opacity-60 */
-}
-
-/* 오늘 날짜 (선택되지 않았을 때) */
-.my-today {
-    border: 1px solid #d1d5db;
-    /* border border-gray-300 */
-    font-weight: 600;
-}
-
-/* ⭐ 선택된 날짜 ⭐ */
-.my-selected {
-    background-color: #111827;
-    /* bg-black */
-    color: white;
-}
-
-/* 선택된 날짜에 호버/포커스해도 스타일이 변하지 않도록 고정 */
-.my-selected:hover,
-.my-selected:focus {
-    background-color: #111827 !important;
-    color: white !important;
-}

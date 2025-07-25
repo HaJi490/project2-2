@@ -36,6 +36,26 @@ body {
      예: max-height: calc(100vh - 200px); */
 }
 
+.textlst.outside{
+  color: #111827; /* text-gray-900 */
+  display: flex;
+  align-items: center;
+  font-weight: 500; /* font-medium */
+  
+}
+
+.textlst.title{
+  color: #6B7280; /* text-gray-500 */
+  font-weight: 400; /* font-normal */
+  margin-right: 1rem; /* mr-4 (16px) */
+  width: 3.75rem; /* w-15 (60px) */
+}
+
+.textlst.item{
+  
+}
+
+
 /* 버튼 */
 /* 라운드 버튼 */
 .propYn{

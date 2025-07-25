@@ -2,7 +2,9 @@
 
 import React, { useRef, useEffect, useState, useMemo } from 'react'
 
-import ReservationPanel from './ReservationPanel'
+import ReservationPanel from './ReservationPanel';
+import Toast from '@/components/Toast/Toast';
+import ConfirmModal from '@/components/ConfirmModal/ConfirmModal'
 import { StationListItem, ChargerInfoMap, ChargerInfoItem } from '@/types/dto'
 import codeToNm from '../../../db/chgerType.json'
 import { IoCalendarClearOutline } from "react-icons/io5";
@@ -36,6 +38,20 @@ export default function StationDetailPanal({
     const [showReserv, setShowReserv] = useState<boolean>(false);
     const [selectedCharger, setSelectedCharger] = useState<ChargerInfoItem | null>(null);
 
+    // 예약확인 모달
+    const [modalInfo, setModalInfo] = useState<{
+        show: boolean;
+        message: string;
+        submessage: string;
+        onConfirm: () => void; // 확인 버튼을 눌렀을 때 실행될 함수
+    }>({
+        show: false,
+        message: '',
+        submessage: '',
+        onConfirm: () => {},
+    });
+    // 토스트메시지
+    const [toastMsg, setToastMsg] = useState<string>('');
 
 
     // 1. 위부 클릭시 패널닫기
@@ -59,8 +75,8 @@ export default function StationDetailPanal({
             }
         }
 
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
+        document.addEventListener('click', handleClickOutside)
+        return () => document.removeEventListener('click', handleClickOutside)
 
     }, [onClose, showReserv, closeDetailRef, selectedStation]); //closeDetailRef
 
@@ -177,12 +193,53 @@ export default function StationDetailPanal({
         setviewMode(null);
     }, [selectedStation]);
 
+    // 예약확인 모달 여는함수(props로 전달)
+    const handleOpenConfirmModal = (
+        message: string,
+        submessage: string,
+        confirmAction: () => void
+    ) => {
+        setModalInfo({
+            show: true,
+            message: message,
+            submessage: submessage,
+            onConfirm: confirmAction,
+        });
+    };
+
+    // 확인모달 닫기
+    const onCancelConrirmModal = () => {
+        setModalInfo({ ...modalInfo,
+                    message: '',
+                    submessage: '',
+                    show: false });
+    }
+
+    // ToastMsg 콜백
+    const handleToastmsg = (msg: string) => {
+        setToastMsg(msg);
+    }
+
+    // 클린업함수 - 디테일 패널 다시 켰을때 모달안나오도록
+    useEffect(() => {
+        // 이 return 함수는 StationDetailPanal 컴포넌트가 unmount 될 때 실행
+        return () => {
+            // 다른 곳에서 어떻게 닫히든, 사라지기 직전에 모달 상태를 확실히 닫아줍니다.
+            onCancelConrirmModal();
+            setToastMsg('');
+        };
+    }, []); // 빈 배열[]: 컴포넌트가 처음 마운트될 때 한 번, 언마운트될 때 한 번" 실행
+
     // 0. selectedStation이 null인 경우 렌더링하지 않음 
     // 제일 위쪽에 둘 경우, '훅의 규칙(Rules of Hooks)' 위반으로 어떤경우에는 밑에 훅들이 렌더링안되서 오류가뜸!
     if (!selectedStation) return null;
 
     return (
         <>
+            <Toast message={toastMsg} setMessage={setToastMsg}/>
+            {modalInfo.show &&
+                <ConfirmModal message={modalInfo.message} submsg={modalInfo.submessage} onConfirm={() => modalInfo.onConfirm()} onCancel={()=>onCancelConrirmModal} />
+            }
             <div
                 ref={panelRef}
                 className='absolute top-103 left-162 h-full -translate-x-1/2 -translate-y-1/2 bg-white  rounded-lg shadow-xl z-20 w-100 max-h-[85vh]'
@@ -394,6 +451,9 @@ export default function StationDetailPanal({
                         <ReservationPanel 
                             charger={selectedCharger}
                             onClose={handleCloseReservation}
+                            onOpenConfirm = {handleOpenConfirmModal}
+                            onCancel = {onCancelConrirmModal}
+                            onSetToastmsg={handleToastmsg}
                         />
                     )}
                 </div>

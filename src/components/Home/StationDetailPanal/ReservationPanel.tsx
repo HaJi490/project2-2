@@ -4,6 +4,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import axios from 'axios';
 import { useAtom } from 'jotai';
 import { accessTokenAtom } from '@/store/auth';
+import { addMinutes, format, parse } from 'date-fns';
 
 import Toast from '@/components/Toast/Toast';
 import ConfirmModal from '@/components/ConfirmModal/ConfirmModal';
@@ -15,17 +16,27 @@ import codeToNm from '../../../db/chgerType.json'
 interface ReservationPanelProps {
     charger: ChargerInfoItem,
     onClose: () => void,
+    // 예약모달
+    onOpenConfirm: (msg: string, submsg: string, confirmAction: () => void) => void;
+    onCancel: () => void;   // 예약모달 닫기
+    // 토스트
+    onSetToastmsg: (msg: string) => void;
 }
 
 type DateFormatTp = 'kor' | 'iso'
 
-export default function ReservationPanel({ charger, onClose }: ReservationPanelProps) {
+export default function ReservationPanel({ 
+    charger, 
+    onClose, 
+    onOpenConfirm, 
+    onCancel, 
+    onSetToastmsg }: ReservationPanelProps) {
     const [token] = useAtom(accessTokenAtom);
     const reservRef = useRef<HTMLDivElement>(null);
-    const [toastMsg, setToastMsg] = useState<string>('');
-    const [confirmMsg, setConfirmMsg] = useState<string>('');
-    const [confSubMsg, setConfSubMsg] = useState<string>('');
-    const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);//필요한가? 확인, 취소할때 false, 예약정보확인 true 설정하기
+    // const [toastMsg, setToastMsg] = useState<string>('');
+    // const [confirmMsg, setConfirmMsg] = useState<string>('');
+    // const [confSubMsg, setConfSubMsg] = useState<string>('');
+    // const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
     const [selectedDate, setSelectedDate] = useState<Date | undefined>();
     const [showDatePicker, setShowDatePicker] = useState<boolean>(true);
@@ -60,6 +71,20 @@ export default function ReservationPanel({ charger, onClose }: ReservationPanelP
             return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         }
         return '';
+    }
+
+    // '3:00' 과 같은 시간 문자열을 받아서 '3:29'를 반환하는 함수
+    function getEndTime(timeString: string): string {
+    // 1. 기준 날짜를 임의로 정하고, 시간 문자열을 Date 객체로 파싱합니다.
+    //    'HH:mm'은 '23:59'와 같은 24시간 형식의 시간임을 알려줍니다.
+    const date = new Date(); // 기준 날짜는 아무거나 상관없습니다.
+    const parsedTime = parse(timeString, 'HH:mm', date);
+
+    // 2. 파싱된 시간에 29분을 더합니다.
+    const timeWith29Minutes = addMinutes(parsedTime, 29);
+
+    // 3. 29분이 더해진 Date 객체를 다시 'HH:mm' 형식의 문자열로 변환합니다.
+    return format(timeWith29Minutes, 'HH:mm');
     }
 
     // 충전기 타입 변환
@@ -147,7 +172,7 @@ export default function ReservationPanel({ charger, onClose }: ReservationPanelP
         ).map(slot => slot.timeId);
 
         if (!isConsecutive(selectedTimeIds || [])) {
-            setToastMsg('연속된 시간대만 선택할 수 있습니다.');
+            onSetToastmsg('연속된 시간대만 선택할 수 있습니다.');
             return;
         }
         setSelectedTime(newSelected);
@@ -156,23 +181,25 @@ export default function ReservationPanel({ charger, onClose }: ReservationPanelP
     // 5. 예약 확인
     const handleConfirmReservation = (chger: ChargerInfoItem) => {
         if (!selectedTime?.length) {
-            setToastMsg('시간대를 선택해주세요.');
+            onSetToastmsg('시간대를 선택해주세요.');
             return;
         }
 
         if (!token) {    // 아래에 알림으로 띄워주기 --  FIXME
-            setToastMsg('로그인이 필요한 서비스입니다.');
+            onSetToastmsg('로그인이 필요한 서비스입니다.');
             return;
         }
-
-        setConfirmMsg('예약 확정하시겠습니까?');
-        setConfSubMsg(`충전소: ${chger.statNm}\n주소: ${chger.addr} \n 충전기: ${chger.chgerId} \n날짜: ${selectedDate}\n시간: \n`);
-        setShowConfirmModal(true);
+        
+        const lastTime = selectedTime[selectedTime.length-1];
+        const msg = '예약 확정하시겠습니까?';
+        const subMsg = `충전소: ${chger.statNm}\n주소: ${chger.addr} \n 충전기: ${chger.chgerId} \n날짜: ${formatDateString(selectedDate, 'kor')}\n시간: ${selectedTime[0]}~${getEndTime(lastTime)}\n`;
+        onOpenConfirm(msg, subMsg, handleReservation)
     }
 
     // 6. 예약 확정
     const handleReservation = async () => {
-        setShowConfirmModal(false);
+        onCancel()
+        console.log('▶▶▶▶▶▶▶▶▶▶예약확정 콘솔')
         const selectedTimeIds = getTimeslots?.filter(slot =>
             selectedTime.includes(slot.startTime.slice(0, 5))
         ).map(slot => slot.timeId);
@@ -183,10 +210,10 @@ export default function ReservationPanel({ charger, onClose }: ReservationPanelP
                 { slotIds: selectedTimeIds },
                 { headers: { Authorization: `Bearer ${token}` } }
             )
-            setToastMsg('예약이 완료되었습니다.')
+            onSetToastmsg('예약이 완료되었습니다.')
         } catch (error) {
             console.log('handleReservation 에러: ', error);
-            setToastMsg('예약에 실패하였습니다.')
+            onSetToastmsg('예약에 실패하였습니다.')
         }
     }
 
@@ -196,10 +223,10 @@ export default function ReservationPanel({ charger, onClose }: ReservationPanelP
             ref={reservRef}
             className='w-full pt-4 border-t fixed bottom-0 left-0 right-0 p-5 bg-white z-20 border-[#f2f2f2] rounded-lg'
         >
-            <Toast message={toastMsg} setMessage={setToastMsg} />
-            {showConfirmModal &&
+            {/* <Toast message={toastMsg} setMessage={setToastMsg} /> */}
+            {/* {showConfirmModal &&
                 <ConfirmModal message={confirmMsg} submsg={confSubMsg} onConfirm={() => handleReservation()} onCancel={() => setShowConfirmModal(false)} />
-            }
+            } */}
             <div>
                 <p className=' text-gray-900 flex items-center font-medium'>
                     <span className='text-gray-500 font-normal mr-4 w-15 '>충전기</span>
@@ -251,7 +278,7 @@ export default function ReservationPanel({ charger, onClose }: ReservationPanelP
                             </div>
                         </div>
                         <button
-                            className='w-full py-3 m-2 bg-[#4FA969] text-white rounded'
+                            className='w-full py-3 m-2 bg-[#4FA969] text-white rounded cursor-pointer'
                             onClick={()=>handleConfirmReservation(charger)}
                         >
                             예약하기
