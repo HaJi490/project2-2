@@ -12,6 +12,8 @@ import { StationListItem } from "../types/dto";
 import nmToid from '../db/busi_id.json'
 import Image from "next/image";
 import style from './home.module.css'
+import statResp from '../db/ChargingStatRespDto.json'
+import statPredictResp from '../db/PredictChargingStatRespDto.json'
 
 interface Filters {
   lat: number;
@@ -89,13 +91,14 @@ export default function Home() {
     console.log("API 요청 보낼 필터:", requestBody);
 
     try {
-      const res = await axios.post<ChargingStationResponseDto[]>(
-        `http://${process.env.NEXT_PUBLIC_BACKIP}:8080/map/post/stations`,
-        requestBody,
-        { signal: controller.signal } 
-      );
-      const data = Array.isArray(res.data) ? res.data : [];
-      return data;
+      // const res = await axios.post<ChargingStationResponseDto[]>(
+      //   `http://${process.env.NEXT_PUBLIC_BACKIP}:8080/map/post/stations`,
+      //   requestBody,
+      //   { signal: controller.signal } 
+      // );
+      // const data = Array.isArray(res.data) ? res.data : [];
+      // return data;
+      return statResp;  //🍕 위에주석풀기
     } catch (err) {
       if (axios.isCancel(err)) return;            // “정상 취소”는 무시
       console.error("fetchStations error: ", err);
@@ -216,12 +219,13 @@ export default function Home() {
     console.log("API 요청 보낼 필터:", requestBody);
 
     try {
-      const res = await axios.post<ChargingStationPredictionResponseDto[]>(
-        `http://${process.env.NEXT_PUBLIC_BACKIP}:8080/pred/location`,
-        requestBody
-      );
-      const data = Array.isArray(res.data) ? res.data : [];
-      return data;
+      // const res = await axios.post<ChargingStationPredictionResponseDto[]>(
+      //   `http://${process.env.NEXT_PUBLIC_BACKIP}:8080/pred/location`,
+      //   requestBody
+      // );
+      // const data = Array.isArray(res.data) ? res.data : [];
+      // return data;
+      return statPredictResp; //🍕
     } catch(err){
       if(axios.isCancel(err)) return;
       console.error('fetchStationPrediction 오류: ', err);

@@ -131,9 +131,9 @@ export default function StationListPanel({
         } */}
         {/* 충전소 목록 */}
         <ul className='scrollContent' ref={listRef}>
-          {list.map((item) => (
+          {list.map((item, idx) => (
             <li
-              key={item.statId}
+              key={`${idx}-${item.statId}`}
               data-station-id={item.statId} // 스크롤용 데이터 속성추가
               className={`${style.listSection} 
                           ${selectedStation?.statId === item.statId ? style.selected : ''} 

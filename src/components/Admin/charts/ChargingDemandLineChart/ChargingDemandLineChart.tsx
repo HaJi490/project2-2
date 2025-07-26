@@ -104,7 +104,7 @@ export default function ChargingDemandLineChart() {
     }
   };
 
-  // 데이터 변환 + 정렬
+  // 데이터 변환 + 정렬(요일)
   const converted = forecastData.map( item => {
     const kor = dayKor[item.week];
 
@@ -132,7 +132,7 @@ export default function ChargingDemandLineChart() {
           </defs>
 
           {/* X축 (날짜). tickFormatter로 날짜 형식을 보기 좋게 변경 */}
-          <XAxis dataKey='week' tickFormatter={(week)=>dayKor(week)}        // (dateStr) => new Date(dateStr).getDate() + '일'
+          <XAxis dataKey='week' //tickFormatter={(week)=>dayKor(week)}        // (dateStr) => new Date(dateStr).getDate() + '일'
                 tick={{fill: '#888888'}} fontSize={12} dy={10}/>
 
           {/* y축(수요량) */}

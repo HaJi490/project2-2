@@ -4,6 +4,7 @@ import "./globals.css";
 import {Provider as JotaiProvider} from 'jotai';
 import TokenExpireWatcher from "@/components/TokenExpireWatcher";
 import ConditionalNav from "@/components/Nav/ConditionalNav";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default function RootLayout({
           </div>
           <main>
             {children}
+            <ScrollToTopButton/>
           </main>
         </JotaiProvider>
       </body>
