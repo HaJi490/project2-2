@@ -50,7 +50,7 @@ export default function ConfirmModal({ message, submsg, onConfirm, onCancel }: C
             document.removeEventListener('mousedown', handleOutsideClick, true);
             document.removeEventListener('keydown', handleEscKey);
         };
-    }, [onCancel])스
+    }, [onCancel]);
 
     return (
         <div role='none' className="fixed inset-0 bg-black/30 flex justify-center items-center z-60 animate-fadeIn">

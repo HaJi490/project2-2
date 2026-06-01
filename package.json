@@ -16,10 +16,10 @@
     "lodash": "^4.17.21",
     "lottie-react": "^2.4.1",
     "mapbox-gl": "^3.13.0",
-    "next": "15.3.5",
-    "react": "^19.0.0",
+    "next": "^16.2.6",
+    "react": "^19.2.6",
     "react-day-picker": "^9.8.0",
-    "react-dom": "^19.0.0",
+    "react-dom": "^19.2.6",
     "react-icons": "^5.5.0",
     "react-kakao-maps-sdk": "^1.2.0",
     "react-map-gl": "^8.0.4",
@@ -27,15 +27,23 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@mswjs/interceptors": "^0.41.9",
     "@tailwindcss/postcss": "^4",
     "@types/geojson": "^7946.0.16",
     "@types/lodash": "^4.17.20",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dexie": "^4.4.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
+    "msw": "^2.14.6",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

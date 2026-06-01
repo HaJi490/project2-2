@@ -6,7 +6,7 @@ import { CHARGER_STATUS_MAP } from '@/constants/charger';
 import ReservationPanel from './ReservationPanel';
 import Toast from '@/components/Toast/Toast';
 import ConfirmModal from '@/components/ConfirmModal/ConfirmModal'
-import { StationListItem, ChargerInfoMap, ChargerInfoItem } from '@/types/dto'
+import { StationListItem, ChargerInfoItem } from '@/types/station/station.response';
 import codeToNm from '../../../db/chgerType.json'
 
 //Icons

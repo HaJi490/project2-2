@@ -5,7 +5,7 @@ import { Map, MapMarker, useKakaoLoader, CustomOverlayMap, Circle, MarkerCluster
 
 import { formatToKm } from '@/utils/fomatToKm';
 import { formatTime } from '@/utils/formatTime';
-import { ChargingStationResponseDto } from '@/types/dto';
+import { ChargingStationResponseDto } from '@/types/station/station.response';
 import { StationMarker, InfoWindowState } from '@/types/station/station.type';
 import TimeFilter from '../Admin/filters/TimeFilter';
 import LottieLoading from '../LottieLoading';
