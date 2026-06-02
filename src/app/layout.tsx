@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Provider as JotaiProvider } from 'jotai';
+import Initializer from "@/components/Initializer";
 import TokenExpireWatcher from "@/components/TokenExpireWatcher";
 import ConditionalNav from "@/components/Nav/ConditionalNav";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
@@ -39,20 +40,22 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <JotaiProvider>
-          {/* 세션 만료 감시 컴포넌트 */}
-          <TokenExpireWatcher />
-          <Script
-            src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JSKEY}&autoload=false&libraries=services,clusterer`}
-            strategy="beforeInteractive" // 지도 사용 전 로드 보장
-          />
-          <header className="fixed top-0 left-0 w-full z-50">
-            <ConditionalNav />
-          </header>
-          <main>
-            {children}
-            {/* 사용자 편의 기능: 상단 이동 버튼 */}
-            <ScrollToTopButton />
-          </main>
+          <Initializer>
+            {/* 세션 만료 감시 컴포넌트 */}
+            <TokenExpireWatcher />
+            <Script
+              src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JSKEY}&autoload=false&libraries=services,clusterer`}
+              strategy="beforeInteractive" // 지도 사용 전 로드 보장
+            />
+            <header className="fixed top-0 left-0 w-full z-50">
+              <ConditionalNav />
+            </header>
+            <main>
+              {children}
+              {/* 사용자 편의 기능: 상단 이동 버튼 */}
+              <ScrollToTopButton />
+            </main>
+          </Initializer>
         </JotaiProvider>
       </body>
     </html>
