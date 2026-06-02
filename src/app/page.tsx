@@ -12,10 +12,9 @@ import ChargingMap from "@/components/Home/ChargingMap";
 import StationListPanel from "@/components/Home/StationListPanel/StationListPanel";
 import ConfirmModal from "@/components/ConfirmModal/ConfirmModal";
 import Toast from "@/components/Toast/Toast";
-import { ChargingStationResponseDto, ChargingStationRequestDto } from '../types/dto';
-import { ChargingStationPredictionRequestDto, RecommendedStationDto } from '../types/dto';
+import { ChargingStationResponseDto, RecommendedStationDto, StationListItem } from "@/types/station/station.response";
+import { ChargingStationRequestDto, ChargingStationPredictionRequestDto } from "@/types/station/station.request";
 import { Filters } from '../types/station/station.type'
-import { StationListItem } from "../types/dto";
 import nmToid from '../db/busi_id.json'
 import style from './home.module.css'
 

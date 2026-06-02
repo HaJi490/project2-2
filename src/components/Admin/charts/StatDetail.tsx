@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { ChargingStationResponseDto } from '@/types/dto'
+import { ChargingStationResponseDto } from '@/types/station/station.response';
 
 interface StatDetailProps {
     statDetail: ChargingStationResponseDto;

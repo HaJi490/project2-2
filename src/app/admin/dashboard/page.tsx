@@ -12,7 +12,8 @@ import ChargingDemandLineChart from '@/components/Admin/charts/ChargingDemandLin
 import StatDetail from '@/components/Admin/charts/StatDetail';
 import KpiCard from '@/components/Admin/charts/KpiCard/KpiCard';
 import { HeatmapFilter } from '@/components/Admin/filters/FilterGroup';
-import { ActualChargingStationData, WeekdayDemand, ChargingStationResponseDto, ChargerTotalStatusData } from '@/types/dto';
+import { ActualChargingStationData, WeekdayDemand, ChargerTotalStatusData } from '@/types/dto';
+import { ChargingStationResponseDto } from '@/types/station/station.response';
 import type { FeatureCollection, Point } from 'geojson';
 import style from './dashboard.module.css'
 

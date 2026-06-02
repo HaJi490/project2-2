@@ -1,129 +1,3 @@
-// 📍전기차충전소 요청dto
-export interface CoordinatesDto {
-    lat: number;
-    lon: number;
-    radius: number;
-}
-
-export interface MapQueryDto {
-    useMap: boolean;
-    limitYn: boolean;
-    parkingFree: boolean;
-    canUse: boolean;
-    outputMin: number;
-    outputMax: number;
-    busiId: string[];     // 사업자 ID 리스트
-    chgerType: string[];  // 충전기 타입 리스트
-    keyWord?: string;
-}
-
-export interface ChargingStationRequestDto {
-    coorDinatesDto: CoordinatesDto;
-    mapQueryDto: MapQueryDto;
-}
-
-// n시간후 전기차충전소 요청dto
-export interface ChargingStationPredictionRequestDto {
-    coorDinatesDto: CoordinatesDto;
-    mapQueryDto: MapQueryDto;
-    time: Date;
-}
-
-// 전기차충전소 응답dto
-export interface ChargerInfoItem {
-    statNm: string;
-    statId: string;
-    chgerId: string;
-    chgerType: string;
-    addr: string;
-    lat: number;
-    lng: number;
-    useTime: string;
-    location: string | null;
-    startUpdatetime: string | null;
-    stat: string;
-    statUpdDt: string;
-    lastTsdt: string;
-    lastTedt: string;
-    nowTsdt: string;
-    output: string;
-    method: string;
-    kind: string;
-    kindDetail: string;
-    parkingFree: string;
-    note: string;
-    limitYn: string;
-    limitDetail: string;
-    delYn: string;
-    busiId: string;
-    busiNm: string;
-}
-
-export interface ChargerInfoMap {
-    [chgerId: string]: ChargerInfoItem;
-}
-
-// 충전소 공통정보
-export interface BaseChargingStationDto {
-    statNm: string;
-    statId: string;
-    addr: string;
-    lat: number;
-    lng: number;
-    parkingFree: boolean;
-    limitYn: boolean;
-    totalChargeNum: number;
-    totalFastNum: number;
-    totalSlowNum: number;
-    chargeFastNum: number;
-    chargeSlowNum: number;
-    totalMidNum: number;
-    chargeMidNum: number;
-    chargeNum: number;
-    enabledCharger: string[];
-    busiId: string;
-    busiNm: string;
-    chargerInfo: Record<string, ChargerInfoItem>; //ChargerInfoMap;
-    useTime: string;
-
-    bestChoice: string | null; // 실제 타입에 맞게 수정하세요.
-    leastDis: number | null;   // 실제 타입에 맞게 수정하세요.
-    leashTime: number | null;  // 실제 타입에 맞게 수정하세요.
-    canLongUse: any | null; // 실제 타입에 맞게 수정하세요.
-
-    // 👇 예측 DTO에 있던
-    totalNacsNum: number;
-    chargingDemand: number;
-}
-
-// (Member) 현재 충전소 응답 DTO
-export interface ChargingStationResponseDto extends BaseChargingStationDto {
-    // 추가되는 속성이 없으므로 비워둡니다.
-}
-
-// // (Member) N시간 후 예측 충전소 응답 DTO
-export interface ChargingStationPredictionResponseDto extends BaseChargingStationDto {
-    // 예측 DTO에만 있는 속성만 여기에 추가합니다.
-    // totalNacsNum: number;
-    // chargingDemand: number;
-}
-// // (Member) 리스트 패널의 아이템을 위한 새로운 타입을 선언합니다.
-export interface StationListItem extends ChargingStationResponseDto {
-    // changeStatus: 'increase' | 'decrease' | 'same' | 'none';
-    predTag: string;
-    minute: number; // 소요시간
-}
-
-// (Member) 예측응답 dto ver.2
-export interface RecommendedStationDto extends BaseChargingStationDto {
-    minute: number;
-    predTag: string;
-    bestChoice: string | null;
-    totalNacsNum: number;
-    chargingDemand: number;
-}
-
-
 // (Manager) 대시보드 히트맵 응답
 export interface ActualChargingStationData {
     statNm: string;
@@ -284,18 +158,18 @@ export interface MyReservationDto {
 
 // 마이페이지 - 회원정보
 export interface User {
-  username: string;
-  nickname: string;
-  password: string; // 응답 값에 보통 비밀번호는 제외되므로 optional 처리
-  phoneNumber: string;
-  email: string;
-  sex: string | null; // null 값이 올 수 있음
-  zipcode: string | null;
-  role: string[]; // 문자열 배열
-  roadAddr: string | null;
-  detailAddr: string | null;
-  enabled: boolean;
-  createAt: string; // ISO 형식 날짜는 string으로 받음
+    username: string;
+    nickname: string;
+    password: string; // 응답 값에 보통 비밀번호는 제외되므로 optional 처리
+    phoneNumber: string;
+    email: string;
+    sex: string | null; // null 값이 올 수 있음
+    zipcode: string | null;
+    role: string[]; // 문자열 배열
+    roadAddr: string | null;
+    detailAddr: string | null;
+    enabled: boolean;
+    createAt: string; // ISO 형식 날짜는 string으로 받음
 }
 
 /**
@@ -377,24 +251,24 @@ export interface History {
  * HATEOAS 응답의 _links 객체에 포함된 링크 정보입니다.
  */
 export interface Link {
-  href: string;
+    href: string;
 }
 export interface Links {
-  self: Link;
-  first?: Link;
-  prev?: Link;
-  next?: Link;
-  last?: Link;
+    self: Link;
+    first?: Link;
+    prev?: Link;
+    next?: Link;
+    last?: Link;
 }
 
 /**
  * HATEOAS 응답의 페이지 정보입니다.
  */
 export interface PageInfo {
-  size: number;
-  totalElements: number;
-  totalPages: number;
-  number: number; // 현재 페이지 번호 (0-indexed)
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    number: number; // 현재 페이지 번호 (0-indexed)
 }
 
 /**
@@ -402,38 +276,38 @@ export interface PageInfo {
  * 제네릭 <T>를 사용하여 어떤 데이터 목록이든 담을 수 있습니다.
  */
 export interface HateoasPageResponse<T> {
-  _embedded: {
-    [key: string]: T[]; 
-  };
-  _links: Links;
-  page: PageInfo;
+    _embedded: {
+        [key: string]: T[];
+    };
+    _links: Links;
+    page: PageInfo;
 }
 
 // 멤버 페이지
 export interface User {
-  username: string;
-  nickname: string;
-  password: string | null;
-  phoneNumber: string;
-  email: string;
-  sex: string | null;
-  zipcode: string | null;
-  role: string[];
-  roadAddr: string | null;
-  detailAddr: string | null;
-  enabled: boolean;
-  createAt: string;
+    username: string;
+    nickname: string;
+    password: string | null;
+    phoneNumber: string;
+    email: string;
+    sex: string | null;
+    zipcode: string | null;
+    role: string[];
+    roadAddr: string | null;
+    detailAddr: string | null;
+    enabled: boolean;
+    createAt: string;
 }
 
 // 문의게시글 페이지
 export interface InquiryBoard {
-  id: number;
-  title: string;
-  content: string;
-  memberUsername: string;
-  createdAt: string | null; // null이 올 수 있으므로 | null 을 추가하는 것이 중요!
-  updatedAt: string;
-  enabled: boolean;
+    id: number;
+    title: string;
+    content: string;
+    memberUsername: string;
+    createdAt: string | null; // null이 올 수 있으므로 | null 을 추가하는 것이 중요!
+    updatedAt: string;
+    enabled: boolean;
 }
 
 
